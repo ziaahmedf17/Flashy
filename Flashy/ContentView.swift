@@ -16,7 +16,7 @@ extension View{
 
 struct ContentView: View {
     @Environment(\.accessibilityDifferentiateWithoutColor) var differentiateWithoutColor
-    @State private var cards = Array<Card>(repeating: Card.example, count: 10)
+    @State private var cards = Array(repeating: Card.example, count: 10)
     
     @State private var timeRemaining = 100
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
@@ -41,6 +41,15 @@ struct ContentView: View {
                         }
                             .stacked(at: index, in: cards.count)
                     }
+                }
+                .allowsTightening(timeRemaining > 0)
+                
+                if cards.isEmpty {
+                    Button("Start Again", action: resetCards())
+                        .padding()
+                        .background(.white)
+                        .foregroundColor(.black)
+                        .clipShape(Capsule())
                 }
             }
             if differentiateWithoutColor {
@@ -81,10 +90,22 @@ struct ContentView: View {
         }
         .onChange(of: scenePhase) { _, newPhase in
             isActive = (newPhase == .active)
+            if cards.isEmpty == false {
+                isActive = true
+            }
         }
     }
     func removeCard(at index: Int) {
         cards.remove(at: index)
+        
+        if cards.isEmpty {
+            isActive = false
+        }
+    }
+    func resetCards() {
+        cards = Array(repeating: Card.example, count: 10)
+        timeRemaining = 100
+        isActive = true
     }
 }
 
